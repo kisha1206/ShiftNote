@@ -718,8 +718,53 @@ main > .view { max-width: 640px; margin: 0 auto; }
 .toast { bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom, 0px)); }
 .filter-bar { margin-inline: -16px; }
 
-/* Wider screens keep the same Notion mobile layout, centred like a phone */
-@media (min-width: 561px) {
-  .app { max-width: 560px; margin: 0 auto; border-inline: 1px solid var(--line); }
-  .sheet-wrap, .install-wrap { max-width: 560px; margin: 0 auto; }
+
+/* ---------- Native app feel ---------- */
+.topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
+.topbar .top-actions { justify-self: end; }
+.brand { transition: opacity .18s ease; min-width: 0; }
+.top-title {
+  font-weight: 600; font-size: .9375rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw;
+  opacity: 0; transform: translateY(4px); transition: opacity .18s ease, transform .18s ease;
+}
+.app.scrolled .top-title { opacity: 1; transform: none; }
+.app.scrolled .brand-name { opacity: 0; }
+.brand-name { transition: opacity .18s ease; }
+
+.view.enter { animation: viewIn .2s ease both; }
+@keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Press feedback, like native lists and buttons */
+.job, .job-row, .menu-row, .by-job-row, .new-row, .prop, .cal-day, .strip-day, .fchip, .chip, .seg button, .icon-btn, .nav-icon, .text-btn {
+  transition: background-color .12s ease, transform .12s ease, opacity .12s ease;
+}
+.job:active, .job-row:active, .menu-row:active, .by-job-row:active, .new-row:active, .prop:active, .cal-day:active { background: var(--hover); transform: scale(.985); }
+.btn:active, .fchip:active, .chip:active, .seg button:active, .strip-day:active { transform: scale(.96); }
+.tab:active svg, .nav-icon:active svg, .icon-btn:active svg, .text-btn:active { opacity: .55; }
+@media (hover: none) { .job:hover, .job-row:hover, .menu-row:hover, .by-job-row:hover, .prop:hover, .cal-day:hover, .btn:hover, .seg button:hover, .tab:hover, .strip-day:hover, .icon-btn:hover, .nav-icon:hover { background: transparent; } .seg button[aria-pressed="true"]:hover { background: var(--hover); } .cal-day.has-jobs:hover { background: var(--green-soft); } .btn.primary:hover { background: var(--accent); } .strip-day[aria-pressed="true"]:hover { background: var(--accent-soft); } }
+
+/* Comfortable touch targets */
+.tab { min-height: 48px; }
+.icon-btn { width: 36px; height: 36px; }
+.menu-row { min-height: 44px; }
+.prop { min-height: 44px; }
+
+/* Sheets slide from the bottom and follow your finger */
+.sheet { touch-action: pan-y; will-change: transform; }
+.grabber { width: 36px; height: 5px; margin: 6px auto 4px; cursor: grab; }
+.sheet-head { touch-action: none; cursor: grab; }
+
+/* Fill the screen on phones of every size, tablets and computers */
+main > .view { max-width: 720px; }
+.sheet, .install-card { max-width: 600px; }
+@media (min-width: 700px) {
+  main { padding-inline: 28px; }
+  .topbar { padding-inline: 24px; }
+  .tabbar { padding-inline: max(8px, calc((100% - 720px) / 2)); }
+  .cal-day { min-height: 64px; }
+  .payout-amount { font-size: 3rem; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  h1 { font-size: 1.5rem; }
+  .tab { min-height: 40px; padding-block: 4px; }
 }

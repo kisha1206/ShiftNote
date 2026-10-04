@@ -957,7 +957,16 @@
   const profileById = id => state.profiles.find(p => p.id === id);
   const shiftsOf = id => state.jobs.filter(j => j.jobId === id);
 
+  const SCREEN_TITLES = { home: 'Your earnings', history: 'History', jobs: 'Jobs', settings: 'Public holidays' };
+  let lastTab = null;
+
   function render(dir) {
+    $('#top-title').textContent = state.tab === 'home' && state.jobFilter ? state.jobFilter : SCREEN_TITLES[state.tab];
+    if (lastTab !== state.tab) {
+      const view = $('#view-' + state.tab);
+      view.classList.remove('enter'); void view.offsetWidth; view.classList.add('enter');
+      lastTab = state.tab;
+    }
     for (const v of ['home', 'history', 'jobs', 'settings']) {
       $('#view-' + v).hidden = state.tab !== v;
       const tab = $('#tab-' + v);
@@ -970,10 +979,12 @@
   }
 
   function setTab(tab) {
+    if (tab === state.tab) { $('main').scrollTo({ top: 0, behavior: 'smooth' }); return; } // tap the active tab to jump to the top
     state.tab = tab;
     try { history.replaceState(null, '', '#' + tab); } catch (e) { /* ignore */ }
     render();
     $('main').scrollTop = 0;
+    $('.app').classList.remove('scrolled');
   }
 
   function shiftHistory(days) {
@@ -1207,7 +1218,31 @@
   };
 
   // Show a hairline under the top bar once the content scrolls, like a native app.
-  $('main').addEventListener('scroll', e => $('.app').classList.toggle('scrolled', e.target.scrollTop > 4), { passive: true });
+  // Like the Notion app: once the big page title scrolls away, its name appears small in the top bar.
+  $('main').addEventListener('scroll', e => $('.app').classList.toggle('scrolled', e.target.scrollTop > 44), { passive: true });
+
+  // Drag a sheet down by its top edge to close it.
+  (function sheetDrag() {
+    let y0 = null, dy = 0, sheet = null;
+    document.addEventListener('pointerdown', e => {
+      if (!e.target.closest('.grabber, .sheet-head') || e.target.closest('button')) return;
+      sheet = $('.sheet'); y0 = e.clientY; dy = 0; sheet.style.transition = 'none';
+    });
+    document.addEventListener('pointermove', e => {
+      if (y0 == null) return;
+      dy = Math.max(0, e.clientY - y0);
+      sheet.style.transform = `translateY(${dy}px)`;
+    });
+    const end = () => {
+      if (y0 == null) return;
+      sheet.style.transition = 'transform .2s ease';
+      if (dy > 90) { sheet.style.transform = 'translateY(100%)'; setTimeout(() => { closeForm(); sheet.style.transform = ''; sheet.style.transition = ''; }, 180); }
+      else sheet.style.transform = '';
+      y0 = null;
+    };
+    document.addEventListener('pointerup', end);
+    document.addEventListener('pointercancel', end);
+  })();
 
   /* ---------- Start ---------- */
 
@@ -1216,6 +1251,8 @@
     const h = (location.hash || '').slice(1);
     if (['home', 'history', 'jobs', 'settings'].includes(h)) state.tab = h;
     render();
+    // Home-screen shortcut: "Add shift"
+    if (new URLSearchParams(location.search).get('action') === 'add-shift') openForm({});
   })();
 
   // Exposed for tests in the browser console.
