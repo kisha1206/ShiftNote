@@ -1,7 +1,15 @@
 /*
  * Install prompt. Every time the site is opened in a normal browser tab
- * (not as the installed app), a popup asks the person to install it.
+ * (not as the installed app), a popup asks the person to install it,
+ * unless Payrate is already installed on this device.
  * "Not now" only hides it for this visit.
+ *
+ * How "already installed" is known:
+ *  - the app itself was opened from the home screen on this device (remembered),
+ *  - the browser reported the install (appinstalled), or
+ *  - Chrome lists it via getInstalledRelatedApps().
+ * If Chrome later offers to install it again (beforeinstallprompt), it was
+ * removed, so the popup comes back.
  */
 (function () {
   'use strict';
@@ -12,7 +20,11 @@
     window.navigator.standalone === true ||
     document.referrer.startsWith('android-app://');
 
-  if (standalone()) return;
+  const KEY = 'payrate.installed';
+  const remember = on => { try { on ? localStorage.setItem(KEY, '1') : localStorage.removeItem(KEY); } catch (e) { /* storage blocked */ } };
+  const remembered = () => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } };
+
+  if (standalone()) { remember(true); return; }
 
   const ua = navigator.userAgent;
   const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -62,6 +74,7 @@
         <div class="install-actions">
           ${deferred ? '<button class="btn primary block" data-install="go">Install app</button>' : ''}
           <button class="btn block" data-install="close">Not now</button>
+          ${deferred ? '' : '<button class="text-btn install-have" data-install="have">I already have the app</button>'}
         </div>
       </div>`;
   }
@@ -69,18 +82,23 @@
   function show() { render(); wrap.hidden = false; }
   function hide() { wrap.hidden = true; }
 
+  let installed = remembered();
+
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferred = e;
+    // The browser only offers this when the app is not installed.
+    if (installed) { installed = false; remember(false); show(); return; }
     if (!wrap.hidden) render(); // swap instructions for the Install button
   });
 
-  window.addEventListener('appinstalled', () => { deferred = null; hide(); });
+  window.addEventListener('appinstalled', () => { deferred = null; installed = true; remember(true); hide(); });
 
   wrap.addEventListener('click', async e => {
     const btn = e.target.closest('[data-install]');
     if (!btn) return;
     if (btn.dataset.install === 'close') return hide();
+    if (btn.dataset.install === 'have') { installed = true; remember(true); return hide(); }
     if (btn.dataset.install === 'go' && deferred) {
       deferred.prompt();
       const choice = await deferred.userChoice.catch(() => null);
@@ -89,6 +107,16 @@
     }
   });
 
-  // Give Chrome a moment to offer its install event, then show the popup on every visit.
-  setTimeout(show, 700);
+  async function relatedInstalled() {
+    if (!navigator.getInstalledRelatedApps) return false;
+    try { return (await navigator.getInstalledRelatedApps()).length > 0; } catch (e) { return false; }
+  }
+
+  // Give Chrome a moment to offer its install event, then show the popup
+  // on every visit, unless the app is already on this device.
+  setTimeout(async () => {
+    if (installed) return;
+    if (await relatedInstalled()) { installed = true; remember(true); return; }
+    if (!installed) show();
+  }, 700);
 })();

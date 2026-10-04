@@ -1,5 +1,5 @@
 // Offline cache for Payrate. Bump VERSION whenever app files change.
-const VERSION = 'payrate-v12';
+const VERSION = 'payrate-v13';
 const SHELL = [
   './', './index.html', './vendor/bootstrap.min.css',
   './styles.css', './storage.js', './holidays-au.js', './app.js', './install.js', './manifest.webmanifest',

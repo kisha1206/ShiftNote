@@ -48,3 +48,7 @@ The layout uses the Bootstrap 5.3 grid and utilities (bundled in `vendor/`, so i
 - Phones (iPhone, Android): one column, icon-only tab bar, sheets slide up from the bottom.
 - Tablets and iPad portrait (768px and up): two columns, labelled tabs, sheets open in the centre.
 - iPad landscape and larger (992px and up): wider content area, tabs show icon and label side by side.
+
+## Install popup
+
+The popup asks visitors to install Payrate each time they open the site in a browser tab, but not when the app is already installed on that device. The app knows it is installed when it has been opened from the home screen on that device, when the browser reports the install, or when Chrome lists it through `getInstalledRelatedApps()`. On iPhone, Safari keeps its storage separate from the home screen app, so the popup has an "I already have the app" link that hides it for good on that browser.

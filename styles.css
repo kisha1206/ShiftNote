@@ -848,3 +848,4 @@ main > .view { max-width: 720px; }
   .sheet-wrap { align-items: center; }
   .sheet { max-height: 92vh; border-radius: 14px; }
 }
+.install-have { align-self: center; color: var(--muted); font-size: .875rem; padding: 6px 8px; background: transparent; border: 0; }
