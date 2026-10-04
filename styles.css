@@ -120,9 +120,9 @@ h2 { font-size: var(--step-1); }
 }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
 
-.row { display: flex; align-items: center; gap: 10px; }
-.row.between { justify-content: space-between; }
-.row.wrap { flex-wrap: wrap; }
+.line { display: flex; align-items: center; gap: 10px; }
+.line.between { justify-content: space-between; }
+.line.wrap { flex-wrap: wrap; }
 
 .icon-btn {
   width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
@@ -338,7 +338,7 @@ h2 { font-size: var(--step-1); }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 
 /* Toast */
-.toast {
+.app-toast {
   position: fixed; left: 50%; transform: translateX(-50%); z-index: 60;
   bottom: calc(var(--tabbar-h) + 18px + env(safe-area-inset-bottom, 0px));
   background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: var(--step--1);
@@ -430,7 +430,7 @@ h2 { font-weight: 600; font-size: 1rem; }
 .job:hover { background: var(--hover); border-color: var(--line); }
 .job .t { font-weight: 500; }
 .job .p { font-size: var(--step-0); font-weight: 600; }
-.job-list > .row { border-bottom: 1px solid var(--line); padding-block: 10px 6px; margin-top: 8px !important; }
+.job-list > .line { border-bottom: 1px solid var(--line); padding-block: 10px 6px; margin-top: 8px !important; }
 
 .badge { text-transform: none; letter-spacing: 0; font-size: .72rem; font-weight: 500; border-radius: 3px; padding: 0 6px; background: var(--holiday-soft); color: var(--holiday-text); }
 
@@ -473,7 +473,7 @@ h2 { font-weight: 600; font-size: 1rem; }
 .hol-name div { font-weight: 500; }
 .hol-item.off .hol-date { background: transparent; }
 
-.toast { border-radius: 6px; background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-weight: 500; }
+.app-toast { border-radius: 6px; background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-weight: 500; }
 
 /* ---------- Notion mobile app ---------- */
 :root { --tag-gray: rgba(227, 226, 224, .6); --icon: rgba(55, 53, 47, .45); }
@@ -525,7 +525,7 @@ h2 { font-size: .875rem; font-weight: 600; color: var(--muted); }
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .job:hover { background: var(--hover); }
-.job-list > .row { border-bottom: 0; padding-block: 12px 2px; }
+.job-list > .line { border-bottom: 0; padding-block: 12px 2px; }
 .new-row {
   display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: var(--faint);
   padding: 8px 6px; border-radius: 6px; text-align: left; font-size: .9375rem; margin-top: -12px;
@@ -715,7 +715,7 @@ main > .view { max-width: 640px; margin: 0 auto; }
   padding: 2px 8px calc(2px + env(safe-area-inset-bottom, 0px));
 }
 .side-brand { display: none; }
-.toast { bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom, 0px)); }
+.app-toast { bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom, 0px)); }
 .filter-bar { margin-inline: -16px; }
 
 
@@ -767,4 +767,84 @@ main > .view { max-width: 720px; }
 @media (orientation: landscape) and (max-height: 500px) {
   h1 { font-size: 1.5rem; }
   .tab { min-height: 40px; padding-block: 4px; }
+}
+
+/* ---------- Bootstrap bridge: Bootstrap grid and utilities, Notion look ---------- */
+:root {
+  --bs-body-bg: var(--bg); --bs-body-color: var(--ink); --bs-border-color: var(--line);
+  --bs-body-font-family: var(--font-body); --bs-body-font-size: 1rem; --bs-body-line-height: 1.5;
+  --bs-emphasis-color: var(--ink); --bs-secondary-color: var(--muted); --bs-link-color: var(--accent-text);
+  --bs-link-hover-color: var(--accent-text); --bs-gutter-x: 1rem;
+}
+p, ul, ol, dl { margin-bottom: 0; }
+h4, h5, h6 { margin: 0; }
+a { color: var(--accent-text); }
+.card { display: block; color: inherit; word-wrap: normal; }
+.card.stack, .card.d-flex { display: flex; }
+.badge { line-height: 1.5; vertical-align: middle; white-space: nowrap; }
+.btn {
+  --bs-btn-color: var(--ink); --bs-btn-bg: transparent; --bs-btn-border-color: var(--line);
+  --bs-btn-hover-color: var(--ink); --bs-btn-hover-bg: var(--hover); --bs-btn-hover-border-color: var(--line);
+  --bs-btn-active-color: var(--ink); --bs-btn-active-bg: var(--hover); --bs-btn-active-border-color: var(--line);
+  --bs-btn-disabled-color: var(--ink); --bs-btn-disabled-bg: transparent; --bs-btn-disabled-border-color: var(--line);
+  --bs-btn-disabled-opacity: .5; --bs-btn-focus-box-shadow: 0 0 0 3px var(--accent-soft);
+  --bs-btn-font-weight: 500; --bs-btn-line-height: 1.4;
+}
+.btn.primary {
+  --bs-btn-color: var(--accent-ink); --bs-btn-bg: var(--accent); --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-color: var(--accent-ink); --bs-btn-hover-bg: var(--accent); --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-color: var(--accent-ink); --bs-btn-active-bg: var(--accent); --bs-btn-active-border-color: var(--accent);
+  --bs-btn-disabled-color: var(--accent-ink); --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent);
+}
+.btn.danger { --bs-btn-color: var(--danger); --bs-btn-hover-color: var(--danger); --bs-btn-active-color: var(--danger); }
+.btn.danger.armed {
+  --bs-btn-color: #fff; --bs-btn-bg: var(--danger); --bs-btn-border-color: var(--danger);
+  --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--danger); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--danger);
+}
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: none; }
+/* Lists that use the Bootstrap grid: the grid gutters do the spacing */
+.job-list.row, .job-rows.row, .hol-list.row { flex-direction: row; gap: 0; }
+.job-list.row { border-top: 0; }
+.job-list.row > .line { margin-top: 6px !important; }
+.hol-list.row > * { min-width: 0; }
+.field.px-0 { padding-inline: 0; }
+
+/* ---------- Every device: phones, iPhone, Android, tablets and iPad ---------- */
+/* Phones (below 768px): one column, icon-only tab bar, bottom sheets. */
+main > .view { max-width: 720px; }
+
+/* Tablets and iPad portrait (768px and up): two columns, labelled tabs, centred sheets. */
+@media (min-width: 768px) {
+  main { padding: 16px 32px 40px; }
+  .topbar { padding-inline: 32px; }
+  main > .view { max-width: 960px; }
+  .tabbar { padding-inline: max(16px, calc((100% - 640px) / 2)); }
+  .tab { flex-direction: column; gap: 2px; padding: 8px 0 6px; }
+  .tab span { position: static; width: auto; height: auto; overflow: visible; clip: auto; font-size: .75rem; font-weight: 500; }
+  .tab svg { width: 22px; height: 22px; }
+  .sheet-wrap { align-items: center; padding: 24px; }
+  .sheet { border-radius: 14px; max-height: min(88vh, 860px); width: 100%; max-width: 560px; }
+  .grabber { display: none; }
+  .cal-day { min-height: 60px; }
+  .top-title { max-width: 40vw; }
+}
+
+/* iPad landscape, large tablets and computers (992px and up): wider content. */
+@media (min-width: 992px) {
+  main > .view { max-width: 1120px; }
+  .tab { flex-direction: row; justify-content: center; gap: 8px; padding: 12px 0; }
+  .tab span { font-size: .8125rem; }
+  .cal-day { min-height: 72px; }
+}
+@media (min-width: 1400px) {
+  main > .view { max-width: 1240px; }
+}
+
+/* Phones turned sideways: keep the bars slim so more content fits. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .topbar { padding-block: calc(4px + env(safe-area-inset-top, 0px)) 4px; }
+  main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tab { min-height: 40px; padding-block: 4px; }
+  .sheet-wrap { align-items: center; }
+  .sheet { max-height: 92vh; border-radius: 14px; }
 }

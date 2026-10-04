@@ -188,10 +188,10 @@
         <span class="n">${d}</span>${js.length ? `<span class="amt">${esc(moneyShort(sum))}</span>` : ''}</button>`;
     }
     const monthName = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    return `<div class="card">
+    return `<div class="card h-100">
       <div class="cal-head">
         <h2>${esc(monthName)}</h2>
-        <div class="row">
+        <div class="line">
           <button class="icon-btn" data-action="cal-prev" aria-label="Previous month">${ICON.left}</button>
           <button class="icon-btn" data-action="cal-next" aria-label="Next month">${ICON.right}</button>
         </div>
@@ -248,11 +248,14 @@
       `<button data-action="period" data-period="${p}" aria-pressed="${state.period === p}">${{ week: 'Week', month: 'Month', all: 'All' }[p]}</button>`).join('');
 
     let html = `
-      <div class="row between wrap">
+      <div class="line between wrap">
         <h1>${state.jobFilter ? esc(state.jobFilter) : 'Your earnings'}</h1>
         <div class="seg" role="group" aria-label="Period">${seg}</div>
       </div>
       ${chips}
+      ${emptyHTML()}
+      <div class="row g-3 home-grid">
+      <div class="col-12 col-md-6 d-flex flex-column gap-3">
       <div class="payout">
         <div class="payout-period">
           ${state.period === 'all' ? '<span></span>' : `<button class="icon-btn" data-action="period-prev" aria-label="Previous period">${ICON.left}</button>`}
@@ -270,33 +273,44 @@
         </div>
       </div>`;
     if (t.extra > 0) html += `<div class="holiday-note">Public holiday double pay added ${esc(money(t.extra))} to this period.</div>`;
-    html += breakdown;
+    html += `</div>`;
+    const chart = `<div class="card stack h-100">
+        <div class="line between"><h2>${state.period === 'all' ? 'Pay by month' : 'Pay by day'}</h2>
+          <div class="legend"><span><i style="background:var(--accent)"></i>Base pay</span><span><i style="background:var(--holiday)"></i>Holiday extra</span></div>
+        </div>
+        ${chartSVG(chartBuckets(range))}
+      </div>`;
+    if (breakdown) {
+      html += `<div class="col-12 col-md-6">${breakdown.replace('class="card stack"', 'class="card stack h-100"')}</div>`;
+      html += `<div class="col-12 col-md-6">${chart}</div>`;
+      html += `<div class="col-12 col-md-6">${calendarHTML()}</div>`;
+    } else {
+      html += `<div class="col-12 col-md-6">${chart}</div>`;
+      html += `<div class="col-12 col-lg-8 col-xl-6">${calendarHTML()}</div>`;
+    }
+    html += `</div>`;
+    $('#view-home').innerHTML = html;
+  }
+
+  function emptyHTML() {
 
     if (!state.jobs.length && state.profiles.length) {
-      html += `<div class="empty-state">
+      return `<div class="empty-state">
         <strong>No shifts yet</strong>
         <span>Log the hours you work at your jobs. Tap a date on the calendar or use the button below.</span>
         <button class="btn primary" data-action="add-shift">Add shift</button>
       </div>`;
     } else if (!state.jobs.length) {
-      html += `<div class="empty-state">
+      return `<div class="empty-state">
         <strong>No jobs yet</strong>
         <span>Add the jobs you work, like a cafe or a delivery app, with their pay rate. Then log each shift with its date and hours. Everything is saved on this device only.</span>
-        <div class="row wrap" style="justify-content:center">
+        <div class="line wrap" style="justify-content:center">
           <button class="btn primary" data-action="new-profile">Add your first job</button>
           <button class="btn" data-action="load-sample">Try with sample data</button>
         </div>
       </div>`;
     }
-
-    html += `<div class="card stack">
-        <div class="row between"><h2>${state.period === 'all' ? 'Pay by month' : 'Pay by day'}</h2>
-          <div class="legend"><span><i style="background:var(--accent)"></i>Base pay</span><span><i style="background:var(--holiday)"></i>Holiday extra</span></div>
-        </div>
-        ${chartSVG(chartBuckets(range))}
-      </div>`;
-    html += calendarHTML();
-    $('#view-home').innerHTML = html;
+    return '';
   }
 
   /* ---------- History ---------- */
@@ -324,15 +338,15 @@
       ${from === to ? `<button class="btn primary" data-action="add-shift" data-date="${from}">Add shift for this day</button>` : ''}</div>`;
     else {
       let cur = '';
-      results = '<div class="job-list">';
+      results = '<div class="job-list row g-1">';
       for (const j of jobs) {
         if (j.date !== cur) {
           cur = j.date;
           const dt = totals(jobsOn(cur)), hol = holidayFor(cur);
-          results += `<div class="row between wrap" style="margin-top:6px"><h3 style="font-size:var(--step-0)">${esc(fmtDay(cur))}${hol ? `<span class="badge">${esc(hol.name)}</span>` : ''}</h3>
+          results += `<div class="line between wrap col-12" style="margin-top:6px"><h3 style="font-size:var(--step-0)">${esc(fmtDay(cur))}${hol ? `<span class="badge">${esc(hol.name)}</span>` : ''}</h3>
             <span class="muted" style="font-size:var(--step--1)">${fmtHours(dt.mins)} · ${esc(money(dt.total))}</span></div>`;
         }
-        results += jobCard(j);
+        results += `<div class="col-12 col-md-6">${jobCard(j)}</div>`;
       }
       results += '</div>';
     }
@@ -345,12 +359,12 @@
           <button data-action="search-mode" data-mode="day" aria-pressed="${q.mode === 'day'}">Single date</button>
         </div>
         ${q.mode === 'day'
-          ? `<div class="field"><label for="s-day">Date</label><input type="date" id="s-day" value="${q.day || ''}"></div>`
-          : `<div class="grid-2">
-              <div class="field"><label for="s-from">Start date</label><input type="date" id="s-from" value="${q.from || ''}"></div>
-              <div class="field"><label for="s-to">End date</label><input type="date" id="s-to" value="${q.to || ''}"></div>
+          ? `<div class="field col-12 col-sm-6 col-md-4 px-0"><label for="s-day">Date</label><input type="date" id="s-day" value="${q.day || ''}"></div>`
+          : `<div class="row g-2">
+              <div class="field col-6 col-md-4"><label for="s-from">Start date</label><input type="date" id="s-from" value="${q.from || ''}"></div>
+              <div class="field col-6 col-md-4"><label for="s-to">End date</label><input type="date" id="s-to" value="${q.to || ''}"></div>
             </div>
-            <div class="row wrap">
+            <div class="line wrap">
               <button class="btn small" data-action="search-preset" data-preset="week">This week</button>
               <button class="btn small" data-action="search-preset" data-preset="lastweek">Last week</button>
               <button class="btn small" data-action="search-preset" data-preset="month">This month</button>
@@ -386,7 +400,7 @@
 
     let list;
     if (dayJobs.length) {
-      list = `<div class="job-list">${dayJobs.map(jobCard).join('')}</div>`;
+      list = `<div class="job-list row g-1">${dayJobs.map(j => `<div class="col-12 col-md-6">${jobCard(j)}</div>`).join('')}</div>`;
     } else {
       list = `<div class="empty-state"><strong>No shifts on ${esc(fmtDay(state.histSel))}</strong>
         <button class="btn primary" data-action="add-shift" data-date="${state.histSel}">Add shift for this day</button></div>`;
@@ -412,7 +426,7 @@
         <div class="stat"><b>${fmtHours(week.mins)}</b><span>7-day hours</span></div>
         <div class="stat"><b>${week.count}</b><span>Shifts</span></div>
       </div>
-      <div class="row between wrap">
+      <div class="line between wrap">
         <h2>${esc(fmtDay(state.histSel))}${hol ? `<span class="badge">${esc(hol.name)}</span>` : ''}</h2>
         ${dayJobs.length ? `<span class="muted">${fmtHours(dayTotal.mins)} · ${esc(money(dayTotal.total))}</span>` : ''}
       </div>
@@ -450,35 +464,27 @@
         ? `<button class="btn small danger" data-action="del-holiday" data-id="${esc(h.id)}">Remove</button>`
         : h.off ? `<button class="btn small" data-action="show-holiday" data-date="${h.date}">Count it</button>`
           : `<button class="btn small" data-action="hide-holiday" data-date="${h.date}">Don't count</button>`;
-      return `<div class="hol-item${h.off ? ' off' : ''}">
+      return `<div class="col-12 col-lg-6"><div class="hol-item${h.off ? ' off' : ''}">
         <div class="hol-date"><b>${d.getDate()}</b><span>${esc(d.toLocaleDateString(undefined, { month: 'short' }))}</span></div>
         <div class="hol-name"><div>${esc(h.name)}</div><small>${esc(sub)}</small></div>
         ${btn}
-      </div>`;
+      </div></div>`;
     }).join('') : `<p class="muted" style="margin:0">No holidays in ${y}. Pick your state above or add your own below.</p>`;
     const opts = window.PayHolidays ? Object.entries(window.PayHolidays.REGIONS).map(([k, v]) =>
       `<option value="${k}"${k === region ? ' selected' : ''}>${esc(v)}</option>`).join('') : '';
 
     $('#view-settings').innerHTML = `
       <h1>Public holidays</h1>
-      <div class="card stack">
+      <div class="row g-3">
+      <div class="col-12 col-md-6"><div class="card stack h-100">
         <div class="field">
           <label for="region">Where you work</label>
           <select id="region">${opts}</select>
         </div>
         <p class="muted" style="margin:0;font-size:var(--step--1)">Shifts on these dates pay double. Pick your state to include its own holidays. Regional days such as show days or the AFL Grand Final Friday are not included, so add them below if they apply to you.</p>
-      </div>
-      <div class="card">
-        <div class="cal-head">
-          <h2>${y}${region !== 'none' ? ` <span class="muted" style="font-family:var(--font-body);font-size:var(--step--1);font-weight:500">${esc(regionName)}</span>` : ''}</h2>
-          <div class="row">
-            <button class="icon-btn" data-action="hol-year" data-step="-1" aria-label="Previous year">${ICON.left}</button>
-            <button class="icon-btn" data-action="hol-year" data-step="1" aria-label="Next year">${ICON.right}</button>
-          </div>
-        </div>
-        <div class="hol-list">${items}</div>
-      </div>
-      <form class="card stack" id="hol-form" novalidate>
+      </div></div>
+      <div class="col-12 col-md-6">
+      <form class="card stack h-100" id="hol-form" novalidate>
         <h2>Add your own holiday</h2>
         <div class="grid-2">
           <div class="field"><label for="hol-date">Date</label><input type="date" id="hol-date" required></div>
@@ -487,7 +493,19 @@
         <label class="check"><input type="checkbox" id="hol-yearly"> Repeats every year on this date</label>
         <div class="error" id="hol-error" hidden></div>
         <button class="btn primary" type="submit">Add holiday</button>
-      </form>
+      </form></div>
+      <div class="col-12">
+      <div class="card">
+        <div class="cal-head">
+          <h2>${y}${region !== 'none' ? ` <span class="muted" style="font-family:var(--font-body);font-size:var(--step--1);font-weight:500">${esc(regionName)}</span>` : ''}</h2>
+          <div class="line">
+            <button class="icon-btn" data-action="hol-year" data-step="-1" aria-label="Previous year">${ICON.left}</button>
+            <button class="icon-btn" data-action="hol-year" data-step="1" aria-label="Next year">${ICON.right}</button>
+          </div>
+        </div>
+        <div class="hol-list row gx-4 gy-0">${items}</div>
+      </div></div>
+      </div>
 
       <h1>Settings</h1>
       <div class="card stack">
@@ -498,13 +516,13 @@
         <div class="stack">
           <div class="label muted" style="font-weight:600;font-size:var(--step--1)">Backup</div>
           <p class="muted" style="margin:0;font-size:var(--step--1)">Your data lives only in this browser. Export a backup file to keep a copy or move it to another device. Importing replaces what is here now.</p>
-          <div class="row wrap">
+          <div class="line wrap">
             <button class="btn small" data-action="export">Export backup</button>
             <label class="btn small" for="import-file" style="cursor:pointer">Import backup</label>
             <input type="file" id="import-file" accept="application/json,.json" hidden>
           </div>
         </div>
-        <div class="row wrap">
+        <div class="line wrap">
           ${state.jobs.some(j => (j.title || '').startsWith('Sample · ')) || state.profiles.some(p => p.name.startsWith('Sample · ')) ? '<button class="btn small" data-action="clear-samples">Remove sample data</button>' : ''}
           <button class="btn small danger" data-action="clear-all" id="clear-all">Delete all data</button>
         </div>
@@ -848,18 +866,18 @@
     const list = [...state.profiles].sort((a, b) => a.name.localeCompare(b.name));
     const rows = list.map(p => {
       const sh = shiftsOf(p.id), t = totals(sh);
-      return `<button class="job-row" data-action="edit-profile" data-id="${esc(p.id)}">
+      return `<div class="col-12 col-md-6 col-xl-4"><button class="job-row w-100" data-action="edit-profile" data-id="${esc(p.id)}">
         <span class="jr-icon">${PROP_ICON.job}</span>
         <span class="jr-main"><span class="jr-name">${esc(p.name)}</span>
           <span class="jr-meta">${p.rate ? esc(money(p.rate)) + '/h · ' : '<span class="warn">No pay rate</span> · '}${t.count} shift${t.count === 1 ? '' : 's'} · ${fmtHours(t.mins)}</span></span>
         <span class="jr-total">${esc(money(t.total))}</span>
-      </button>`;
+      </button></div>`;
     }).join('');
     $('#view-jobs').innerHTML = `
       <h1>Jobs</h1>
       <p class="muted" style="margin:-8px 0 0;font-size:.875rem">The places or roles you work. Each shift you log belongs to one of these jobs.</p>
-      <div class="job-rows">${rows || ''}
-        <button class="new-row" data-action="new-profile" style="margin-top:0"><span>+</span> New job</button>
+      <div class="job-rows row g-1">${rows || ''}
+        <div class="col-12"><button class="new-row" data-action="new-profile" style="margin-top:0"><span>+</span> New job</button></div>
       </div>`;
   }
 

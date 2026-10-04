@@ -40,3 +40,11 @@ Write a new object with the same async methods as `createLocalStore()` in storag
 (listJobs, putJob, deleteJob, listHolidays, putHoliday, deleteHoliday, getSettings,
 saveSettings, exportAll, importAll, clearAll) and assign it to `window.PayStore`.
 The screens don't need changes. Export a backup from the app first to migrate existing data.
+
+## Layout on every device
+
+The layout uses the Bootstrap 5.3 grid and utilities (bundled in `vendor/`, so it still works offline), styled to look like the Notion app.
+
+- Phones (iPhone, Android): one column, icon-only tab bar, sheets slide up from the bottom.
+- Tablets and iPad portrait (768px and up): two columns, labelled tabs, sheets open in the centre.
+- iPad landscape and larger (992px and up): wider content area, tabs show icon and label side by side.
