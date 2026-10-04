@@ -687,3 +687,56 @@ h2 { font-size: .875rem; font-weight: 600; color: var(--muted); }
 .step-ico svg { width: 18px; height: 18px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .install-note { margin: 0; padding: 12px; background: var(--surface-2); border-radius: 10px; font-size: .875rem; color: var(--ink); }
 .install-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- App shell: fixed bars, only the content scrolls ---------- */
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body {
+  position: fixed; inset: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+input, textarea, .job, .page-title { -webkit-user-select: text; user-select: text; }
+.app {
+  height: 100%; max-width: none; margin: 0; padding: 0;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "top" "main" "nav";
+}
+.topbar {
+  grid-area: top; margin: 0; padding-inline: 16px; padding-block: calc(8px + env(safe-area-inset-top, 0px)) 8px;
+  background: var(--bg); border-bottom: 1px solid transparent; z-index: 10;
+}
+.app.scrolled .topbar { border-bottom-color: var(--line); }
+main {
+  grid-area: main; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 8px 16px 28px;
+}
+main > .view { max-width: 640px; margin: 0 auto; }
+.tabbar {
+  grid-area: nav; position: static; max-width: none; margin: 0; border-radius: 0 !important; border-inline: 0 !important;
+  padding: 2px 8px calc(2px + env(safe-area-inset-bottom, 0px));
+}
+.side-brand { display: none; }
+.toast { bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom, 0px)); }
+.filter-bar { margin-inline: -16px; }
+
+/* Computers: Notion-style sidebar instead of bottom tabs */
+@media (min-width: 900px) {
+  .app { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "nav top" "nav main"; }
+  .tabbar {
+    display: flex; flex-direction: column; gap: 2px; align-items: stretch; padding: 12px 8px;
+    background: var(--surface-2); border-top: 0; border-right: 1px solid var(--line);
+  }
+  .side-brand { display: flex; align-items: center; gap: 8px; padding: 6px 10px 14px; }
+  .side-brand .brand-mark { width: 22px; height: 22px; }
+  .tab { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 7px 10px; border-radius: 6px; font-size: .875rem; font-weight: 500; color: var(--muted); }
+  .tab span { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .tab svg { width: 18px; height: 18px; }
+  .tab:hover { background: var(--hover); }
+  .tab[aria-current="page"] { background: var(--hover); color: var(--ink); }
+  .topbar .brand { visibility: hidden; }
+  main { padding: 12px 32px 40px; }
+  .toast { bottom: 24px; }
+  .sheet-wrap { align-items: center; }
+  .sheet { border-radius: 12px; max-height: 88%; max-width: 520px; }
+  .grabber { display: none; }
+}
+@media (min-width: 900px) { .chart { max-height: 240px; margin: 0 auto; } }

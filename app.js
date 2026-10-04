@@ -973,7 +973,7 @@
     state.tab = tab;
     try { history.replaceState(null, '', '#' + tab); } catch (e) { /* ignore */ }
     render();
-    window.scrollTo(0, 0);
+    $('main').scrollTop = 0;
   }
 
   function shiftHistory(days) {
@@ -1073,7 +1073,7 @@
       }
       case 'del-holiday': await Store.deleteHoliday(el.dataset.id); await reload(); render(); toast('Holiday removed'); break;
       case 'load-sample': await loadSample(); break;
-      case 'job-filter': state.jobFilter = el.dataset.name || null; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); break;
+      case 'job-filter': state.jobFilter = el.dataset.name || null; render(); $('main').scrollTo({ top: 0, behavior: 'smooth' }); break;
       case 'hist-mode': state.histMode = el.dataset.mode; render(); break;
       case 'search-mode': state.search.mode = el.dataset.mode; render(); break;
       case 'search-preset': {
@@ -1205,6 +1205,9 @@
     filter: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
   };
+
+  // Show a hairline under the top bar once the content scrolls, like a native app.
+  $('main').addEventListener('scroll', e => $('.app').classList.toggle('scrolled', e.target.scrollTop > 4), { passive: true });
 
   /* ---------- Start ---------- */
 
